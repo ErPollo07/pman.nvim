@@ -26,7 +26,7 @@ function M.setup(user_config)
   vim.api.nvim_create_user_command(
     "Pman",
     function(opts)
-      local project_name = opts.args[0]
+      local project_name = opts.args
 
       local path = config.projects[project_name]
 
