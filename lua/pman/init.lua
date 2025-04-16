@@ -14,7 +14,11 @@ function M.setup(user_config)
   vim.api.nvim_create_user_command(
     "Pman",
     function(opts)
-      print(opts.args)
+      print()
+
+      local project_name = opts.args[0]
+
+      print(project_name .. " : " .. config.projects[project_name])
     end,
     { nargs = 1, desc = "Switch to project" }
   )
