@@ -1,10 +1,17 @@
 local M = {}
 
 -- Mappa dei progetti
-local projects = {
-  a = { name = "My Cool Project", path = "C:/Users/Utente/dev/project1" },
-  b = { name = "Plugin Dev", path = "C:/Users/Utente/AppData/Local/nvim/plugins/pman.nvim" },
-}
+local projects = {} 
+
+local config = {}
+
+function M.setup(user_config)
+  local default_config = require("conifg")
+  -- Merge the default config with the user config
+  config = vim.tbl_deep_extend("force", default_config, user_config or {})
+
+  projects = config.projects
+end
 
 function M.setup()
   vim.api.nvim_command("enew") -- apre un buffer vuoto
