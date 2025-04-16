@@ -12,11 +12,11 @@ function M.setup(user_config)
   
   -- Register command to switch between projects
   vim.api.nvim_create_user_command(
-    "AlphaProjects",
-    function(project)
+    "Pman",
+    function(opts)
       print(string.format("%s : %s", config.projects[project]))
     end,
-    { desc = "Switch to next project" }
+    { nargs = 1, desc = "Switch to project" }
   )
 
 end
