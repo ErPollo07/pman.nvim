@@ -1,40 +1,50 @@
 local M = {}
 
--- Mappa dei progetti
-local projects = {} 
+local config = {
+  header = {},
+  projects = {},
+}
 
-local config = {}
+local selected_index = 1
 
 function M.setup(user_config)
-  local default_config = require("conifg")
-  -- Merge the default config with the user config
-  config = vim.tbl_deep_extend("force", default_config, user_config or {})
-
-  projects = config.projects
+  config = vim.tbl_deep_extend("force", config, user_config or {})
+  M.render()
 end
 
-function M.setup()
-  vim.api.nvim_command("enew") -- apre un buffer vuoto
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, {
-    "🛠️  Project Manager",
-    "Seleziona un progetto:",
-  })
+function M.render()
+  vim.api.nvim_command("enew")
+  vim.bo.bufhidden = "wipe"
+  vim.bo.buftype = "nofile"
+  vim.bo.swapfile = false
+  vim.bo.buflisted = false
+  vim.wo.cursorline = true
 
-  for key, proj in pairs(projects) do
-    vim.api.nvim_buf_set_lines(0, -1, -1, false, { string.format("[%s] %s", key, proj.name) })
+  local lines = vim.deepcopy(config.header)
+  for i, proj in ipairs(config.projects) do
+    local line = string.format(" [%d] %s : %s", i, proj.name, proj.path)
+    table.insert(lines, line)
   end
+  table.insert(lines, " [q] Exit")
 
-  -- Ascolta i tasti
-  vim.api.nvim_buf_set_keymap(0, "n", "<Esc>", ":q<CR>", { noremap = true })
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
 
-  for key, proj in pairs(projects) do
-    vim.keymap.set("n", key, function()
-      -- Chiude Neovim e lo riapre nella directory del progetto
-      local cmd = string.format("start cmd /k cd /d %q && nvim", proj.path)
-      os.execute(cmd)
-      vim.cmd("qall!")
-    end, { buffer = true })
-  end
+  -- Set cursor to the first project
+  vim.api.nvim_win_set_cursor(0, { #config.header + 1, 0 })
+
+  -- Keymaps
+  vim.keymap.set("n", "<CR>", function()
+    local row = vim.fn.line(".")
+    local index = row - #config.header
+    if config.projects[index] then
+      local proj = config.projects[index]
+      vim.cmd("cd " .. proj.path)
+      vim.cmd("e .")
+    end
+  end, { buffer = true })
+
+  vim.keymap.set("n", "q", ":q<CR>", { buffer = true })
 end
 
 return M
+
